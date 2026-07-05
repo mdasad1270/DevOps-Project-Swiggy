@@ -57,14 +57,18 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                     sh '''
-                        git config user.email "asadkhan.@gmail.com"
-                        git config user.name "Asad Khan"
-                        BUILD_NUMBER=${BUILD_NUMBER}
-                        sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" ArgoCD/deployment.yml
-                        git add ArgoCD/deployment.yml
-                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
-                    '''
+                      git config user.email "asadkhan@gmail.com"
+                      git config user.name "Asad Khan"
+
+                      sed -i "s|image: asadkhan03/swiggy-app-img:.*|image: asadkhan03/swiggy-app-img:${BUILD_NUMBER}|g" ArgoCD/deployment.yml
+
+                      git add ArgoCD/deployment.yml
+
+                      git diff --cached --quiet || \
+                      git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+
+                      git push https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:master
+                   '''
                 }
             }
         }
